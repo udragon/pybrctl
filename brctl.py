@@ -10,101 +10,110 @@ class BridgeException(Exception):
 
 class Bridge(object):
 
-    def __init__(self, name): 
+    def __init__(self, name):
+        """ Create a bridge a set the device up """
         self.name = name
-        p = subprocess.Popen(['/sbin/brctl', 'addbr', self.name])
-        if p.wait():
-            raise BridgeException("Could not create bridge %s." % self.name)
-        p = subprocess.Popen(['/sbin/ip', 'link', 'set', 'dev', self.name, 'up'])
-        if p.wait():
-            raise BridgeException("Could not set link up for %s." % self.name)
+        self._runshell(['/sbin/brctl', 'addbr', self.name],
+            "Could not create bridge %s." % self.name)
+        self._runshell(['/sbin/ip', 'link', 'set', 'dev', self.name, 'up'],
+            "Could not set link up for %s." % self.name)
 
     def __del__(self):
-        p = subprocess.Popen(['/sbin/ip', 'link', 'set', 'dev', self.name, 'down'])
-        if p.wait():
-            raise BridgeException("Could not set link down for %s." % self.name)
-        p = subprocess.Popen(['/sbin/brctl', 'delbr', self.name])
-        if p.wait():
-            raise BridgeException("Could not delete bridge %s." % self.name)
+        """ Set the device down and delete the bridge. """
+        self._runshell(['/sbin/ip', 'link', 'set', 'dev', self.name, 'down'],
+            "Could not set link down for %s." % self.name)
+        self._runshell(['/sbin/brctl', 'delbr', self.name],
+            "Could not delete bridge %s." % self.name)
 
+    def _runshell(self, cmd, exception):
+        """ Run a shell command. if fails, raise a proper exception. """
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if p.wait() != 0:
+            raise BridgeException(exception)
+        return p
+ 
     def addif(self, iname):
-        p = subprocess.Popen(['/sbin/brctl', 'addif', self.name, iname])
-        if p.wait():
-            raise BridgeException("Could not add interface %s to %s." % (iname, self.name))
+        """ Add an interface to the bridge """
+        self._runshell(['/sbin/brctl', 'addif', self.name, iname],
+            "Could not add interface %s to %s." % (iname, self.name))
 
     def delif(self, iname):
-        p = subprocess.Popen(['/sbin/brctl', 'delif', self.name, iname])
-        if p.wait():
-            raise BridgeException("Could not delete interface %s from %s." % (iname, self.name))
+        """ Delete an interface from the bridge. """
+        self._runshell(['/sbin/brctl', 'delif', self.name, iname],
+            "Could not delete interface %s from %s." % (iname, self.name))
 
-    def hairpin(self, port, val):
+    def hairpin(self, port, val=True):
+        """ Turn harpin on/off on a port. """ 
         if val: state = 'on' 
         else: state = 'off'
-        p = subprocess.Popen(['/sbin/brctl', 'hairpin', self.name, port, state])
-        if p.wait():
-            raise BridgeException("Could not set hairpin in port %s in %s." % (port, self.name))
+        self._runshell(['/sbin/brctl', 'hairpin', self.name, port, state],
+            "Could not set hairpin in port %s in %s." % (port, self.name))
 
-    def stp(self, val):
+    def stp(self, val=True):
+        """ Turn STP protocol on/off. """
         if val: state = 'on' 
         else: state = 'off'
-        p = subprocess.Popen(['/sbin/brctl', 'stp', self.name, state])
-        if p.wait():
-            raise BridgeException("Could not set stp on %s." % self.name)
-
+        self._runshell(['/sbin/brctl', 'stp', self.name, state],
+            "Could not set stp on %s." % self.name)
 
     def setageing(self, time):
-        p = subprocess.Popen(['/sbin/brctl', 'setageing', self.name, str(time)])
-        if p.wait():
-            raise BridgeException("Could not set ageing time in %s." % self.name)
+        """ Set bridge ageing time. """
+        self._runshell(['/sbin/brctl', 'setageing', self.name, str(time)],
+            "Could not set ageing time in %s." % self.name)
 
     def setbridgeprio(self, prio):
-        p = subprocess.Popen(['/sbin/brctl', 'setbridgeprio', self.name, str(prio)])
-        if p.wait():
-            raise BridgeException("Could not set bridge priority in %s." % self.name)
+        """ Set bridge priority value. """
+        self._runshell(['/sbin/brctl', 'setbridgeprio', self.name, str(prio)],
+            "Could not set bridge priority in %s." % self.name)
     
     def setfd(self, time):
-        p = subprocess.Popen(['/sbin/brctl', 'setfd', self.name, str(time)])
-        if p.wait():
-            raise BridgeException("Could not set forward delay in %s." % self.name)
+        """ Set bridge forward delay time value. """
+        self._runshell(['/sbin/brctl', 'setfd', self.name, str(time)],
+            "Could not set forward delay in %s." % self.name)
 
     def sethello(self, time):
-        p = subprocess.Popen(['/sbin/brctl', 'sethello', self.name, str(time)])
-        if p.wait():
-            raise BridgeException("Could not set hello time in %s." % self.name)
+        """ Set bridge hello time value. """
+        self._runshell(['/sbin/brctl', 'sethello', self.name, str(time)],
+            "Could not set hello time in %s." % self.name)
    
     def setmaxage(self, time):
-        p = subprocess.Popen(['/sbin/brctl', 'setmaxage', self.name, str(time)])
-        if p.wait():
-            raise BridgeException("Could not set max message age in %s." % self.name)
+        """ Set bridge max message age time. """
+        self._runshell(['/sbin/brctl', 'setmaxage', self.name, str(time)],
+            "Could not set max message age in %s." % self.name)
  
     def setpathcost(self, port, cost):
-        p = subprocess.Popen(['/sbin/brctl', 'setpathcost', self.name, port, str(cost)])
-        if p.wait():
-            raise BridgeException("Could not set path cost in port %s in %s." % (port, self.name))
+        """ Set port path cost value for STP protocol. """
+        self._runshell(['/sbin/brctl', 'setpathcost', self.name, port, str(cost)],
+            "Could not set path cost in port %s in %s." % (port, self.name))
  
     def setportprio(self, port, prio):
-        p = subprocess.Popen(['/sbin/brctl', 'setportprio', self.name, port, str(prio)])
-        if p.wait():
-            raise BridgeException("Could not set priority in port %s in %s." % (port, self.name))
+        """ Set port priority value. """
+        self._runshell(['/sbin/brctl', 'setportprio', self.name, port, str(prio)],
+            "Could not set priority in port %s in %s." % (port, self.name))
 
     def _show(self):
-        p = subprocess.Popen(['/sbin/brctl', 'show', self.name], stdout=subprocess.PIPE)
-        if p.wait():
-            raise BridgeException("Could not show %s." % self.name)
+        """ Return a list of unsorted bridge details. """ 
+        p = self._runshell(['/sbin/brctl', 'show', self.name],
+            "Could not show %s." % self.name)
         return p.stdout.read().split()[7:]
 
     def get_id(self):
+        """ Return the bridge id value. """
         return self._show()[1]
 
     def get_interfaces(self):
+        """ Return a list of bridge interfaces. """
         return self._show()[3:]
 
     def is_stp_enabled(self):
+        """ Return if STP protocol is enabled. """
         return self._show()[2] == 'yes'
 
     def showmacs(self):
+        """ Return a list of mac addresses. """
         raise NotImplementedError()
 
     def showstp(self):
+        """ Return STP information. """
         raise NotImplementedError()
             
