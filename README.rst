@@ -8,18 +8,18 @@ It was written by Ido Nahshon at Jan 2015, and it was released under the GPL lic
 
 Example Usage
 =============
-    ::
+  ::
 
-    from pybrctl import BridgeController
+  from pybrctl import BridgeController
 
-    brctl = BridgeController()
+  brctl = BridgeController()
 
-    b = brctl.addbr("br0")
-    b.addif("eth0")
-    b.addif("eth1")
-    b.setmaxageing(0)
+  b = brctl.addbr("br0")
+  b.addif("eth0")
+  b.addif("eth1")
+  b.setmaxageing(0)
     
-    brctl.delbr("br0")
+  brctl.delbr("br0")
 
 Source
 ======
