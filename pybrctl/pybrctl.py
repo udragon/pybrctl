@@ -1,8 +1,3 @@
-"""
-Linux brctl wrapper
-Written by Ido Nahshon.
-"""
-
 import subprocess 
 
 class BridgeException(Exception):
@@ -15,9 +10,11 @@ class Bridge(object):
         self.name = name
 
     def __str__(self):
+    	""" Return a string of the bridge name. """
         return self.name
 
     def __repr__(self):
+    	""" Return a representaion of a bridge object. """
         return "<Bridge: %s>" % self.name
 
     def addif(self, iname):
@@ -138,7 +135,7 @@ class BridgeController(object):
         for br in self.showall():
             if br.name == name:
                 return br
-        raise BridgeException("Bridge does not exists.")
+        raise BridgeException("Bridge does not exist.")
 
 
 def _runshell(cmd, exception):
