@@ -3,7 +3,7 @@
 Pybrctl is a pure Python library for managing bridges. It is a lightwight wrapper for the linux brctl command, included in the bridge-utils package.
 It requires Python, Linux, and the bridge-utils package.
 
-It was Written by Ido Nahshon at Jan 2015, and it was released under the GPL license.
+It was written by Ido Nahshon at Jan 2015, and it was released under the GPL license.
 
 # Example Usage
 
