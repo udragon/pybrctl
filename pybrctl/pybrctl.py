@@ -130,8 +130,7 @@ class BridgeController(object):
         p = _runshell([brctlexe, 'show'],
             "Could not show bridges.")
         wlist = map(str.split, p.stdout.read().splitlines()[1:])
-        brwlist = filter(lambda x: len(x) == 3, wlist)
-        brlist = map(lambda x: x[0], brwlist)
+        brlist = map(lambda x: x[0], wlist)
         return map(Bridge, brlist)
 
     def getbr(self, name):
