@@ -116,17 +116,17 @@ class BridgeController(object):
     def addbr(self, name):
         """ Create a bridge and set the device up. """
         _runshell([brctlexe, 'addbr', name],
-            "Could not create bridge %s." % name)
+            None)
         _runshell([ipexe, 'link', 'set', 'dev', name, 'up'],
-            "Could not set link up for %s." % name)
+            None)
         return Bridge(name)
 
     def delbr(self, name):
         """ Set the device down and delete the bridge. """
         _runshell([ipexe, 'link', 'set', 'dev', name, 'down'],
-            "Could not set link down for %s." % name)
+            None)
         _runshell([brctlexe, 'delbr', name],
-            "Could not delete bridge %s." % name)
+            None)
 
     def showall(self):
         """ Return a list of all available bridges. """
@@ -147,7 +147,10 @@ def _runshell(cmd, exception):
     """ Run a shell command. if fails, raise a proper exception. """
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if p.wait() != 0:
-        raise BridgeException(p.stderr.readlines()[0])
+        if not exception:
+            raise BridgeException(p.stderr.readlines()[0])
+        else:
+            raise BridgeException(exception)
     return p
 
 
