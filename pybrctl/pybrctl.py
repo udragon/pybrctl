@@ -100,11 +100,15 @@ class Bridge(object):
 
     def showmacs(self):
         """ Return a list of mac addresses. """
-        raise NotImplementedError()
-
+        p = _runshell([brctlexe, 'showmacs', self.name],
+            "Could not showmacs for Bridge %s." %self.name)
+        return p.stdout.read()
+        
     def showstp(self):
         """ Return STP information. """
-        raise NotImplementedError()
+        p = _runshell([brctlexe, 'showstp', self.name],
+            "Could not show %s." %self.name)
+        return p.stdout.read()
            
 
 class BridgeController(object):
@@ -112,18 +116,17 @@ class BridgeController(object):
     def addbr(self, name):
         """ Create a bridge and set the device up. """
         _runshell([brctlexe, 'addbr', name],
-            "Could not create bridge %s." % name)
+            None)
         _runshell([ipexe, 'link', 'set', 'dev', name, 'up'],
-            "Could not set link up for %s." % name)
+            None)
         return Bridge(name)
 
     def delbr(self, name):
         """ Set the device down and delete the bridge. """
-        self.getbr(name) # Check if exists
         _runshell([ipexe, 'link', 'set', 'dev', name, 'down'],
-            "Could not set link down for %s." % name)
+            None)
         _runshell([brctlexe, 'delbr', name],
-            "Could not delete bridge %s." % name)
+            None)
 
     def showall(self):
         """ Return a list of all available bridges. """
@@ -135,18 +138,19 @@ class BridgeController(object):
         return map(Bridge, brlist)
 
     def getbr(self, name):
-        """ Return a bridge object."""
         for br in self.showall():
             if br.name == name:
                 return br
         raise BridgeException("Bridge does not exist.")
 
-
 def _runshell(cmd, exception):
     """ Run a shell command. if fails, raise a proper exception. """
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if p.wait() != 0:
-        raise BridgeException(exception)
+        if not exception:
+            raise BridgeException(p.stderr.readlines()[0])
+        else:
+            raise BridgeException(exception)
     return p
 
 
