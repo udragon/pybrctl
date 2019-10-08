@@ -10,9 +10,9 @@ Example Usage
 =============
 This example shows how to set up a new bridge and remove it::
 
-  from pybrctl import BridgeController
+  from pybrctl import pybrctl
 
-  brctl = BridgeController()
+  brctl = pybrctl.BridgeController()
 
   b = brctl.addbr("br0")
   b.addif("eth0")
