@@ -114,7 +114,7 @@ class Bridge(object):
             [brctlexe, 'show', self.name],
             "Could not show %s." % self.name
         )
-        return p.stdout.read().split()[7:]
+        return p.stdout.read().decode().split()[7:]
 
     def getid(self):
         """ Return the bridge id value. """
@@ -169,7 +169,7 @@ class BridgeController(object):
             [brctlexe, 'show'],
             "Could not show bridges."
         )
-        wlist = map(str.split, p.stdout.read().splitlines()[1:])
+        wlist = map(str.split, p.stdout.read().decode().splitlines()[1:])
         brwlist = filter(lambda x: len(x) != 1, wlist)
         brlist = map(lambda x: x[0], brwlist)
         return map(Bridge, brlist)
