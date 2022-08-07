@@ -1,1 +1,4 @@
-from pybrctl import BridgeController
+from .pybrctl import (
+  BridgeController,
+  Bridge
+)
